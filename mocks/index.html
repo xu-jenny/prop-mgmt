@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unit Types Onboarding</title>
+<style>
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --surface-2: #f1f3f6; --border: #e2e5ea; --border-strong: #cdd2da;
+  --text: #1b2230; --text-2: #4d5768; --text-3: #7a8494;
+  --accent: #2456c9; --accent-soft: #e8eefc; --accent-text: #ffffff;
+  --ok: #1d7a46; --ok-soft: #e4f4ea; --warn: #94600a; --warn-soft: #fdf1dc; --bad: #b42318; --bad-soft: #fde8e6;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --radius: 8px; --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1218; --surface: #171b23; --surface-2: #1e232d; --border: #2a303c; --border-strong: #3a4250;
+    --text: #e7eaf0; --text-2: #aab2c0; --text-3: #7c8595;
+    --accent: #6d95ff; --accent-soft: #1d2a4a; --accent-text: #0c1220;
+    --ok: #5bd08a; --ok-soft: #15301f; --warn: #f0b552; --warn-soft: #33270f; --bad: #ff8a7a; --bad-soft: #3a1714;
+    --shadow: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1218; --surface: #171b23; --surface-2: #1e232d; --border: #2a303c; --border-strong: #3a4250;
+  --text: #e7eaf0; --text-2: #aab2c0; --text-3: #7c8595;
+  --accent: #6d95ff; --accent-soft: #1d2a4a; --accent-text: #0c1220;
+  --ok: #5bd08a; --ok-soft: #15301f; --warn: #f0b552; --warn-soft: #33270f; --bad: #ff8a7a; --bad-soft: #3a1714;
+  --shadow: none; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--accent); }
+code, .mono { font-family: var(--mono); font-size: 12.5px; }
+h1 { font-size: 20px; margin: 0 0 4px; }
+h2 { font-size: 15px; margin: 0 0 10px; }
+h3 { font-size: 13px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-3); }
+p { margin: 0 0 8px; }
+.muted { color: var(--text-2); } .faint { color: var(--text-3); }
+
+/* shell */
+.topbar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 16px; padding: 10px 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.brand { font-weight: 650; letter-spacing: -.01em; }
+.brand small { font-weight: 400; color: var(--text-3); margin-left: 6px; }
+.prop-pill { display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-2); font-size: 13px; }
+.spacer { flex: 1; }
+.user { font-size: 13px; color: var(--text-2); }
+.mockbar { padding: 6px 20px; font-size: 12px; color: var(--warn); background: var(--warn-soft); border-bottom: 1px solid var(--border); }
+.layout { display: grid; grid-template-columns: 250px minmax(0,1fr); min-height: calc(100vh - 84px); }
+.side { border-right: 1px solid var(--border); background: var(--surface); padding: 16px 12px; }
+.side a.navlink { display: block; padding: 6px 10px; border-radius: 6px; text-decoration: none; color: var(--text-2); margin-bottom: 2px; }
+.side a.navlink:hover { background: var(--surface-2); }
+.side a.navlink.active { background: var(--accent-soft); color: var(--text); font-weight: 600; }
+.steps { list-style: none; margin: 8px 0 0; padding: 0; }
+.steps li a { display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: start; padding: 8px 10px; border-radius: 6px; text-decoration: none; color: var(--text); }
+.steps li a:hover { background: var(--surface-2); }
+.steps li a.active { background: var(--accent-soft); }
+.steps .dot { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; border: 1.5px solid var(--border-strong); color: var(--text-3); background: var(--surface); }
+.steps .dot.done { background: var(--ok); border-color: var(--ok); color: var(--surface); }
+.steps .dot.attn { border-color: var(--warn); color: var(--warn); }
+.steps .dot.block { border-color: var(--bad); color: var(--bad); }
+.steps .dot.locked { opacity: .5; }
+.steps .lbl { font-size: 13.5px; font-weight: 550; }
+.steps .sub { display: block; font-size: 12px; color: var(--text-3); font-weight: 400; }
+.side .sep { border-top: 1px solid var(--border); margin: 14px 4px; }
+main { padding: 22px 28px 60px; min-width: 0; }
+.pagehead { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+.pagehead .grow { flex: 1; }
+.stepno { font-size: 12px; color: var(--text-3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 2px; }
+
+/* components */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; margin-bottom: 16px; }
+.card.flush { padding: 0; overflow: hidden; }
+.card .cardhead { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.card .cardhead h2 { margin: 0; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font: inherit; font-weight: 550; cursor: pointer; white-space: nowrap; }
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.btn.primary:hover { filter: brightness(1.07); }
+.btn.sm { padding: 3px 8px; font-size: 12.5px; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; filter: none; }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--surface-2); color: var(--text-2); white-space: nowrap; }
+.badge.ok { background: var(--ok-soft); color: var(--ok); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); }
+.badge.bad { background: var(--bad-soft); color: var(--bad); }
+.badge.info { background: var(--accent-soft); color: var(--accent); }
+.banner { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: var(--radius); border: 1px solid; margin-bottom: 16px; }
+.banner.bad { background: var(--bad-soft); border-color: color-mix(in srgb, var(--bad) 35%, transparent); }
+.banner.warn { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+.banner.ok { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 35%, transparent); }
+.banner.info { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+.banner strong { display: block; margin-bottom: 2px; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-weight: 600; color: var(--text-3); font-size: 12px; text-transform: uppercase; letter-spacing: .03em; padding: 8px 12px; background: var(--surface-2); border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr.hl td { background: color-mix(in srgb, var(--warn-soft) 70%, transparent); }
+tr.hlbad td { background: color-mix(in srgb, var(--bad-soft) 70%, transparent); }
+tr.clickable { cursor: pointer; } tr.clickable:hover td { background: var(--surface-2); }
+.field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+.field .hint { font-size: 12px; color: var(--text-3); }
+input[type=text], select { font: inherit; padding: 7px 9px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); color: var(--text); width: 100%; }
+input[type=text]:focus, select:focus { outline: 2px solid color-mix(in srgb, var(--accent) 40%, transparent); outline-offset: 0; border-color: var(--accent); }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
+.tabs button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px; font: inherit; font-weight: 550; color: var(--text-2); cursor: pointer; white-space: nowrap; }
+.tabs button.active { color: var(--text); border-bottom-color: var(--accent); }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 16px; }
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.kpi .v { font-size: 22px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.kpi .l { font-size: 12px; color: var(--text-3); }
+.ev { display: inline-flex; gap: 3px; }
+.ev span { font-size: 11px; font-weight: 700; font-family: var(--mono); padding: 1px 5px; border-radius: 4px; }
+.ev .y { background: var(--ok-soft); color: var(--ok); }
+.ev .n { background: var(--bad-soft); color: var(--bad); }
+.ev .x { background: var(--surface-2); color: var(--text-3); }
+.upload { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.upload:last-child { border-bottom: 0; }
+.upload .name { font-weight: 600; }
+.upload .file { font-family: var(--mono); font-size: 12px; color: var(--text-2); word-break: break-all; }
+.upload .parsed { grid-column: 1 / -1; font-size: 12.5px; color: var(--text-2); }
+.recon { display: grid; grid-template-columns: repeat(3, 1fr) auto; gap: 10px; align-items: stretch; }
+.recon .cell { border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+.recon .cell .v { font-size: 22px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.recon .cell .l { font-size: 12px; color: var(--text-3); }
+.recon .verdict { display: grid; place-items: center; padding: 0 14px; font-weight: 700; border-radius: 6px; }
+.catalog { display: grid; grid-template-columns: 260px minmax(0,1fr); gap: 16px; align-items: start; }
+.planlist { max-height: 640px; overflow-y: auto; }
+.planlist button { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--border); padding: 8px 12px; font: inherit; color: var(--text); cursor: pointer; }
+.planlist button:hover { background: var(--surface-2); }
+.planlist button.active { background: var(--accent-soft); }
+.planlist .pn { font-weight: 650; font-family: var(--mono); }
+.planlist .ps { font-size: 12px; color: var(--text-3); grid-column: 1; }
+.plandetail { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; }
+.drawing { border: 1px solid var(--border); border-radius: 6px; background: #f3f0e8; aspect-ratio: 4 / 3.2; position: relative; overflow: hidden; }
+.drawing svg { width: 100%; height: 100%; display: block; filter: grayscale(1) contrast(.9); }
+.drawing .cap { position: absolute; left: 8px; bottom: 8px; font-family: var(--mono); font-size: 11px; background: rgba(255,255,255,.85); color: #333; padding: 2px 6px; border-radius: 4px; }
+.proposal { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.proposal.conflict { color: var(--warn); font-weight: 600; }
+.seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); color: var(--text-2); padding: 6px 12px; font: inherit; cursor: pointer; border-right: 1px solid var(--border-strong); }
+.seg button:last-child { border-right: 0; }
+.seg button.on { background: var(--accent); color: var(--accent-text); }
+.picker { display: grid; gap: 8px; margin-top: 10px; }
+.cand { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; }
+.cand.best { border-color: var(--accent); }
+.files li { font-family: var(--mono); font-size: 12px; padding: 4px 0; border-bottom: 1px dashed var(--border); display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; }
+.files { list-style: none; padding: 0; margin: 0; max-height: 300px; overflow: auto; }
+.check { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; }
+.check input { margin-top: 3px; width: 16px; height: 16px; }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(30px); opacity: 0; transition: .2s; background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: 6px; font-size: 13px; pointer-events: none; z-index: 50; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.lockedcard { text-align: center; padding: 48px 20px; }
+.toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.note { font-size: 12px; color: var(--text-3); padding: 10px 16px; border-top: 1px solid var(--border); }
+.switch { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-2); cursor: pointer; }
+
+@media (max-width: 1100px) {
+  .plandetail { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .side { min-width: 0; }
+  .side { border-right: 0; border-bottom: 1px solid var(--border); }
+  .steps { display: flex; overflow-x: auto; gap: 4px; }
+  .steps li a { grid-template-columns: 22px auto; white-space: nowrap; }
+  .steps .sub { display: none; }
+  .side .sep, .side .navlink { display: none; }
+  main { padding: 16px; }
+  .grid2, .grid3, .catalog, .plandetail { grid-template-columns: minmax(0, 1fr); }
+  .planlist { max-height: 260px; }
+  .recon { grid-template-columns: 1fr 1fr; }
+  .recon .verdict { grid-column: 1 / -1; padding: 8px; }
+  .topbar { padding: 10px 16px; flex-wrap: wrap; }
+  .user { display: none; }
+  .mockbar { padding: 6px 16px; }
+  .pagehead { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">Unit Types Onboarding <small>MVP mock</small></div>
+  <span class="prop-pill" id="propPill"><strong>194</strong> Julius · Stamford, CT</span>
+  <div class="spacer"></div>
+  <button class="btn sm" id="themeBtn" type="button" aria-label="Toggle theme">Theme</button>
+  <span class="user">Signed in as analyst</span>
+</header>
+<div class="mockbar">Mock with illustrative data. Totals, helper names and overrides quoted in the PRD (356 units, 67 → 26 → 30, S01 = S2, A07+ = A1D, A11+ = B2 …) are exact; the rest is filler. Buttons are wired to local state only.</div>
+
+<div class="layout">
+  <nav class="side" aria-label="Onboarding steps">
+    <a class="navlink" href="#properties" data-route="properties">← All properties</a>
+    <div class="sep"></div>
+    <h3 style="padding: 0 10px">194 · Julius</h3>
+    <ol class="steps" id="steps"></ol>
+  </nav>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ---------------- mock data ---------------- */
+const PROP = { code: '194', name: 'Julius', street: '1 Harbor Point Rd', city: 'Stamford', state: 'CT', zip: '06901', country: 'United States' };
+
+// helper, plan, beds, baths, den, sfMin, sfMax, market, affordable, priorCodes
+const PLANS = [
+  ['S01','S2',0,1,false,472,488,22,6,3], ['S02','S1',0,1,false,489,505,10,0,2], ['S03','S3',0,1,false,503,520,8,0,2], ['S04','S4',0,1,false,538,552,12,4,3],
+  ['A01','A1',1,1,false,584,598,26,0,3], ['A02','A2',1,1,false,600,618,20,0,3], ['A03','A3',1,1,false,612,630,14,0,2], ['A04','A4',1,1,false,633,645,12,0,2],
+  ['A05','A5',1,1,false,648,660,14,0,2], ['A06','A6',1,1,false,661,715,40,8,10], ['A07+','A1D',1,1,true,681,694,10,0,3], ['A08','A7',1,1,false,731,742,12,0,2],
+  ['A09+','A4D',1,1,true,764,778,8,0,2], ['A10','A8',1,1,false,812,826,10,0,2], ['A11+','B2',1,2,true,973,990,6,0,3], ['A12+','A2D',1,2,true,1049,1062,4,0,2],
+  ['B01','B1',2,2,false,966,984,22,4,4], ['B02','B3',2,2,false,1010,1024,12,0,2], ['B03','B4',2,2,false,1042,1058,12,0,2], ['B04','B5',2,2,false,1088,1102,10,0,2],
+  ['B05','B6',2,2,false,1120,1136,12,0,2], ['B06','B7',2,2,false,1165,1180,10,0,2], ['B07','B8',2,2,false,1210,1226,10,0,2], ['B08','B9',2,2,false,1262,1275,8,0,2],
+  ['B09','B10',2,2,false,1318,1334,6,0,2], ['B10+','B1D',2,2,true,1468,1480,4,0,1],
+].map(([helper, plan, beds, baths, den, sfMin, sfMax, mkt, aff, codes]) => ({ helper, plan, beds, baths, den, sfMin, sfMax, mkt, aff, codes, file: `Toll Brothers_${plan}.pdf` }));
+
+const PRIOR = [
+  // code, description, label, units, sf, rent, plan, evidence [L,BB,D,SF,U] (1 yes, 0 no, null n/a), conf, flag
+  ['s2-1','Studio/1 Bath-S2 (s2-1)','S2',12,'472–480','2,450','S2',[1,1,1,1,null],'High'],
+  ['s2-2','Studio/1 Bath-S2 (s2-2)','S2',10,'481–488','2,475','S2',[1,1,1,1,null],'High'],
+  ['ms2','Studio/1 Bath-S2 (ms2)','S2',6,'472','1,612','S2',[1,1,1,1,null],'High'],
+  ['s3d','Studio Den-S3 (s3d)','S3',5,'538–545','2,690','S4',[0,1,0,1,null],'Medium','E-04'],
+  ['a1-1','1 Bed/1 Bath-A1 (a1-1)','A1',14,'584–590','3,050','A1',[1,1,1,1,null],'High'],
+  ['a6-1','1 Bed/1 Bath-A6 (a6-1)','A6',6,'661–664','3,320','A6',[1,1,1,1,null],'High'],
+  ['a6-7','1 Bed/1 Bath-A6 (a6-7)','A6',4,'709–715','3,410','A6',[1,1,1,0,null],'Medium','E-07'],
+  ['ma6','1 Bed/1 Bath-A6 (ma6)','A6',8,'661','1,921','A6',[1,1,1,1,null],'High'],
+  ['a1d-1','1 Bed/1 Bath Den-A1D (a1d-1)','A1D',4,'681–686','3,390','A1D',[1,1,1,1,null],'High'],
+  ['a3d-1','1 Bed/2 Bath Den-A3D (a3d-1)','A3D',2,'973–976','4,180',null,[0,null,null,null,null],'None','E-01'],
+  ['a3d-2','1 Bed/2 Bath Den -A3D (a3d-2)','A3D',2,'980–984','4,210',null,[0,null,null,null,null],'None','E-01'],
+  ['a3d-3','1 Bed/2 Bath Den- A3D (a3d-3)','A3D',2,'990','4,240',null,[0,null,null,null,null],'None','E-01'],
+  ['a2d-1','1 Bed/1 Bath Den-A2D (a2d-1)','A2D',2,'1,049–1,055','4,390','A2D',[1,0,1,1,null],'Medium','E-05'],
+  ['b1-1','2 Bed/2 Bath-B1 (b1-1)','B1',8,'966–972','4,350','B1',[1,1,1,1,null],'High'],
+  ['mb1','2 Bed/2 Bath-B1 (mb1)','B1',4,'966','2,284','B1',[1,1,1,1,null],'High'],
+  ['b1d-1','2 Bed/2 Bath Den-B1D (b1d-1)','B1D',4,'1,468–1,480','6,120','B1D',[1,1,1,1,null],'High'],
+];
+
+const UNITS = [
+  ['201','s2-1','S2','S01','Market','','m','194mS01','194r','2','01','472','0','1','2,450'],
+  ['202','ms2','S2','S01','Affordable','50%','a','194aS01','194a','2','02','472','0','1','1,612'],
+  ['203','a1-1','A1','A01','Market','','m','194mA01','194r','2','03','584','1','1','3,050'],
+  ['204','a6-1','A6','A06','Market','','m','194mA06','194r','2','04','661','1','1','3,320'],
+  ['205','ma6','A6','A06','Affordable','50%','a','194aA06','194a','2','05','661','1','1','1,921'],
+  ['206','a1d-1','A1D','A07+','Market','','m','194mA07+','194r','2','06','681','1','1','3,390'],
+  ['207','a3d-1','B2','A11+','Market','','m','194mA11+','194r','2','07','973','1','2','4,180'],
+  ['208','b1-1','B1','B01','Market','','m','194mB01','194r','2','08','966','2','2','4,350'],
+  ['209','mb1','B1','B01','Affordable','50%','a','194aB01','194a','2','09','966','2','2','2,284'],
+  ['310','s3d','S4','S04','Market','','m','194mS04','194r','3','10','538','0','1','2,690'],
+  ['311','a2d-1','A2D','A12+','Market','','m','194mA12+','194r','3','11','1,049','1','2','4,390'],
+  ['812','b1d-1','B1D','B10+','Market','','m','194mB10+','194r','8','12','1,468','2','2','6,120'],
+];
+
+/* ---------------- mock state ---------------- */
+const state = {
+  route: 'review',
+  countMismatch: false,
+  catalogSel: 'A2D',
+  confirmed: new Set(PLANS.map(p => p.plan).filter(p => !['B9','B10'].includes(p))),
+  a3dPick: null,
+  amiCode: '',
+  acks: new Set(),
+  approved: false,
+  etlChecked: false,
+  complete: false,
+  reviewTab: 'exceptions',
+  matchFilter: 'all',
+  changelog: [
+    ['2026-11-21 14:02','analyst','Plan B2 · beds/den','2 bd, no den','1 bd + den','Drawing shows 1 bedroom + den (D11)'],
+    ['2026-11-21 14:05','analyst','Plan A2D · baths','1','2','Drawing shows 2 baths; plan wins (D6)'],
+    ['2026-11-21 14:09','analyst','Prior code s3d · plan','S3 (label)','S4','SF 538–545 and drawing match S4, no den (D2)'],
+  ],
+};
+
+function exceptions() {
+  const unconfirmed = PLANS.filter(p => !state.confirmed.has(p.plan)).map(p => p.plan);
+  return [
+    { id: 'E-01', sev: 'blocking', kind: 'Prior code matches no plan', subject: 'a3d-1, a3d-2, a3d-3 · 6 units',
+      detail: 'Label "A3D" names no uploaded plan. Best fits by evidence: B2, A2D, A4D.',
+      resolved: !!state.a3dPick, resolution: state.a3dPick ? `Matched to ${state.a3dPick} by analyst` : '', action: 'match' },
+    { id: 'E-02', sev: 'blocking', kind: 'AMI % has no code', subject: '50% AMI · 22 units',
+      detail: 'The template\'s AMI & Regulatory Status tab has no 50% row (D5). Supply a code; it is saved for this property.',
+      resolved: !!state.amiCode, resolution: state.amiCode ? `Code "${state.amiCode}" saved to Settings` : '', action: 'ami' },
+    { id: 'E-03', sev: 'blocking', kind: 'Plan unconfirmed', subject: unconfirmed.length ? unconfirmed.join(', ') : 'All plans',
+      detail: 'Every plan in the catalog must be confirmed against its drawing.',
+      resolved: unconfirmed.length === 0, resolution: unconfirmed.length ? '' : '26 of 26 confirmed', action: 'catalog' },
+    { id: 'E-04', sev: 'review', kind: 'Label disagrees with matched plan', subject: 's3d · 5 units',
+      detail: '"Studio Den-S3" matched to plan S4 by SF (538–545) and drawing; S4 has no den, so no "+" (D2).', action: 'ack' },
+    { id: 'E-05', sev: 'review', kind: 'Bath count disagrees with plan', subject: 'a2d-1, a2d-2 → A2D',
+      detail: 'Prior data says 1 bath; confirmed drawing says 2. The plan wins (D6).', action: 'ack' },
+    { id: 'E-06', sev: 'review', kind: 'Den disagrees with file name', subject: 'Plan B2',
+      detail: '"Toll Brothers_B2.pdf" has no D suffix; analyst marked 1 bed + den (D11) → A11+.', action: 'ack' },
+    { id: 'E-07', sev: 'review', kind: 'Wide SF spread', subject: 'Plan A6 · 10 prior codes · 48 units',
+      detail: 'Units run 661–715 SF (54 SF). Threshold for "wide" is a placeholder until D9 is settled.', action: 'ack' },
+  ].map(e => e.action === 'ack' ? { ...e, resolved: state.acks.has(e.id), resolution: state.acks.has(e.id) ? 'Acknowledged by analyst' : '' } : e);
+}
+const openBlocking = () => exceptions().filter(e => e.sev === 'blocking' && !e.resolved);
+const openReview = () => exceptions().filter(e => e.sev === 'review' && !e.resolved);
+
+/* ---------------- helpers ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200); }
+function log(field, oldV, newV, reason) {
+  const d = new Date(); const pad = n => String(n).padStart(2, '0');
+  state.changelog.push([`2026-11-22 ${pad(d.getHours())}:${pad(d.getMinutes())}`, 'analyst', field, oldV, newV, reason]);
+}
+const ev = arr => `<span class="ev" title="Label · Beds/baths · Den · SF · Units">${['L','BB','D','SF','U'].map((k, i) => `<span class="${arr[i] === 1 ? 'y' : arr[i] === 0 ? 'n' : 'x'}">${k}</span>`).join('')}</span>`;
+const bb = p => `${p.beds === 0 ? 'Studio' : p.beds + ' bd'} / ${p.baths} ba${p.den ? ' + den' : ''}`;
+
+/* ---------------- step status ---------------- */
+function stepStatus() {
+  const blk = openBlocking(), rev = openReview();
+  const unconf = PLANS.length - state.confirmed.size;
+  const matchOpen = state.a3dPick ? 0 : 3;
+  return [
+    { id: 'setup', n: '1–2', lbl: 'Header & uploads', sub: state.countMismatch ? 'Stopped: counts disagree' : '356 units reconciled', st: state.countMismatch ? 'block' : 'done' },
+    { id: 'catalog', n: '3', lbl: 'Floor plan catalog', sub: `${state.confirmed.size} of ${PLANS.length} confirmed`, st: unconf ? 'attn' : 'done' },
+    { id: 'matching', n: '4', lbl: 'Match prior codes', sub: matchOpen ? `${67 - matchOpen} of 67 matched` : '67 of 67 matched', st: matchOpen ? 'attn' : 'done' },
+    { id: 'review', n: '5–8', lbl: 'Review · Gate 1', sub: state.approved ? 'Approved' : `${blk.length} blocking · ${rev.length} to review`, st: state.approved ? 'done' : blk.length ? 'block' : 'attn' },
+    { id: 'outputs', n: '9–10', lbl: 'Outputs · Gate 2', sub: state.complete ? 'Property complete' : state.approved ? 'Check ETL workbook' : 'Locked until gate 1', st: state.complete ? 'done' : state.approved ? 'attn' : 'locked' },
+  ];
+}
+function renderSteps() {
+  $('#steps').innerHTML = stepStatus().map(s => `<li><a href="#${s.id}" class="${state.route === s.id ? 'active' : ''}">
+      <span class="dot ${s.st}">${s.st === 'done' ? '✓' : s.n.split('–')[0]}</span>
+      <span><span class="lbl">${s.lbl}</span><span class="sub">${s.sub}</span></span></a></li>`).join('');
+  document.querySelectorAll('.navlink').forEach(a => a.classList.toggle('active', a.dataset.route === state.route));
+}
+
+/* ---------------- screens ---------------- */
+const screens = {};
+
+screens.properties = () => `
+  <div class="pagehead"><div class="grow"><h1>Properties</h1><p class="muted">Each property keeps its uploads, settings, overrides and approvals, so a re-run reproduces the approved result.</p></div>
+  <button class="btn primary" onclick="toast('Mock: opens the new-property header form')">New property</button></div>
+  <div class="card flush"><div class="tablewrap"><table>
+    <thead><tr><th>Code</th><th>Property</th><th>Prior system</th><th class="num">Units</th><th>Status</th><th>Updated</th></tr></thead>
+    <tbody>
+      <tr class="clickable" onclick="go('review')"><td class="mono">194</td><td><strong>Julius</strong><div class="faint">Stamford, CT</div></td><td>Yardi</td><td class="num">356</td>
+        <td>${state.complete ? '<span class="badge ok">Complete</span>' : state.approved ? '<span class="badge info">Gate 2 · ETL check</span>' : '<span class="badge warn">Gate 1 · in review</span>'}</td><td class="faint">Today</td></tr>
+      <tr class="clickable" onclick="toast('Mock: only Julius is wired up')"><td class="mono">207</td><td><strong>Halsey Yard</strong><div class="faint">New Haven, CT</div></td><td>Yardi</td><td class="num">212</td><td><span class="badge">Uploading</span></td><td class="faint">2 days ago</td></tr>
+      <tr class="clickable" onclick="toast('Mock: only Julius is wired up')"><td class="mono">188</td><td><strong>Marlow Commons</strong><div class="faint">White Plains, NY</div></td><td>Yardi</td><td class="num">148</td><td><span class="badge ok">Complete</span></td><td class="faint">Oct 30</td></tr>
+    </tbody></table></div></div>`;
+
+screens.setup = () => {
+  const mm = state.countMismatch;
+  return `
+  <div class="pagehead"><div class="grow"><div class="stepno">Steps 1–2</div><h1>Property header & uploads</h1>
+    <p class="muted">Fill the header, drop the files. The three Yardi reports are parsed and their unit counts must agree before anything else runs.</p></div>
+    <label class="switch"><input type="checkbox" ${mm ? 'checked' : ''} onchange="state.countMismatch=this.checked; render()"> Preview the stop state</label></div>
+
+  ${mm ? `<div class="banner bad"><div><strong>Stopped at step 2: unit counts disagree</strong>
+     Directory has 356 units, the rent schedule's Grand Total says 356, the rent roll has 355. Units on one side only: <code>1204</code> (directory only).
+     Fix the export or upload a corrected file; nothing downstream runs until the counts agree.</div></div>` : ''}
+
+  <div class="card"><h2>Reconcile unit counts</h2>
+    <div class="recon">
+      <div class="cell"><div class="v">356</div><div class="l">Unit directory</div></div>
+      <div class="cell"><div class="v">356</div><div class="l">Rent schedule Grand Total</div></div>
+      <div class="cell"><div class="v">${mm ? '355' : '356'}</div><div class="l">Rent roll (one row per unit)</div></div>
+      <div class="verdict" style="background:var(${mm ? '--bad-soft' : '--ok-soft'});color:var(${mm ? '--bad' : '--ok'})">${mm ? '✕ Stop' : '✓ Agree'}</div>
+    </div></div>
+
+  <div class="grid2">
+    <div class="card"><h2>Property header</h2><p class="faint" style="font-size:12px">Fills rows 2–8 of the ETL Final tab.</p>
+      <div class="grid2" style="gap:0 12px">
+        <div class="field"><label>Rose property code</label><input type="text" value="${PROP.code}"></div>
+        <div class="field"><label>Name</label><input type="text" value="${PROP.name}"></div>
+      </div>
+      <div class="field"><label>Street</label><input type="text" value="${PROP.street}"></div>
+      <div class="grid3" style="gap:0 12px">
+        <div class="field"><label>City</label><input type="text" value="${PROP.city}"></div>
+        <div class="field"><label>State</label><input type="text" value="${PROP.state}"></div>
+        <div class="field"><label>Zip</label><input type="text" value="${PROP.zip}"><span class="hint">Stored as text</span></div>
+      </div>
+      <div class="field"><label>Country</label><input type="text" value="${PROP.country}"></div>
+    </div>
+
+    <div class="card flush"><div class="cardhead"><h2>Uploads</h2><div class="spacer"></div><button class="btn sm" onclick="toast('Mock: file picker')">Add files</button></div>
+      ${[
+        ['Unit directory','Required','ResAnalytics_Unit_Directory_julius.xlsx','356 units · 67 unit types · headers row 3, data from row 5 · 2 total rows dropped','ok'],
+        ['Market rent schedule','Required','ResAnalytics_Market_Rent_Schedule_julius.xlsx','67 descriptions split into bed/bath · label · code · Grand Total 356','ok'],
+        ['Rent roll with lease charges','Recommended','ResAnalytics_Rent_Roll_with_Lease_Charges_julius.xlsx',mm ? '355 units after collapsing charge lines · 0 non-revenue' : '356 units after collapsing charge lines · 0 non-revenue · 3 down units (flag only)', mm ? 'bad' : 'ok'],
+        ['Floor plans','Required','26 files · Toll Brothers_S1.pdf … Toll Brothers_B1D.pdf','26 plan names read from file names · 6 propose a den (D suffix)','ok'],
+        ['Regulatory list','Required (affordable units)','Julius_regulatory_list.xlsx','22 affordable units · all 50% AMI','ok'],
+        ['ETL workbook template','Required','194 - Julius - Units & Unit Types.xlsx','Final tab found · AMI tab: 8 tiers · 131 rows missing the column H formula (handled at step 10)','warn'],
+      ].map(([n, req, f, parsed, st]) => `<div class="upload"><div><span class="name">${n}</span> <span class="faint" style="font-size:12px">· ${req}</span><div class="file">${esc(f)}</div></div>
+          <div><span class="badge ${st}">${st === 'ok' ? 'Parsed' : st === 'warn' ? 'Parsed · note' : 'Mismatch'}</span></div><div class="parsed">${esc(parsed)}</div></div>`).join('')}
+    </div>
+  </div>
+  <div style="display:flex;justify-content:flex-end"><button class="btn primary" ${mm ? 'disabled' : ''} onclick="go('catalog')">Continue to catalog →</button></div>`;
+};
+
+function drawingSVG(p) {
+  // a schematic "scanned" plan; rooms vary by bedroom count
+  const rooms = p.beds === 0 ? [[20,20,190,150,'LIVING / SLEEP'],[210,20,90,70,'BATH'],[210,90,90,80,'KITCHEN']]
+    : p.beds === 1 ? [[20,20,150,150,'LIVING'],[170,20,130,95,'BEDROOM'],[170,115,70,55,'BATH'],[240,115,60,55,'KIT']]
+    : [[20,20,130,150,'LIVING'],[150,20,150,75,'BEDROOM 1'],[150,95,90,75,'BEDROOM 2'],[240,95,60,40,'BATH'],[240,135,60,35,'BATH']];
+  if (p.den || p.plan === 'B2') rooms.push([20,170,110,50,'DEN']);
+  if (p.baths === 2 && p.beds === 1) rooms.push([130,170,80,50,'BATH 2']);
+  return `<svg viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Scanned floor plan ${p.plan}">
+    <rect width="320" height="240" fill="#f4f1ea"/>
+    ${rooms.map(([x,y,w,h,t]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#333" stroke-width="3"/><text x="${x+w/2}" y="${y+h/2+3}" font-size="9" text-anchor="middle" fill="#444" font-family="Arial">${t}</text>`).join('')}
+    <text x="300" y="232" font-size="11" text-anchor="end" fill="#222" font-family="Arial" font-weight="bold">PLAN ${p.plan}</text>
+    <line x1="0" y1="${60 + (p.plan.length*13)%120}" x2="320" y2="${62 + (p.plan.length*13)%120}" stroke="#000" stroke-opacity=".05" stroke-width="6"/>
+  </svg>`;
+}
+
+screens.catalog = () => {
+  const p = PLANS.find(x => x.plan === state.catalogSel);
+  const conf = state.confirmed.has(p.plan);
+  const fileDen = /D$/.test(p.plan);
+  const notes = {
+    A2D: { baths: 'Prior data: 1 bath (codes a2d-1, a2d-2) — drawing shows 2', bathsConflict: true },
+    B2: { beds: 'Prior label says 2 bed ("1 Bed/2 Bath Den-A3D" codes) — drawing: 1 bed + den (D11)', denConflict: true },
+    S4: { den: 'Code s3d says "Studio Den" — drawing shows no den (D2)' },
+  }[p.plan] || {};
+  const done = state.confirmed.size;
+  return `
+  <div class="pagehead"><div class="grow"><div class="stepno">Step 3</div><h1>Floor plan catalog</h1>
+    <p class="muted">One row per uploaded plan. Values are proposed from the file name and the prior data; confirm each against its drawing. The drawing wins whenever it disagrees.</p></div>
+    <span class="badge ${done === PLANS.length ? 'ok' : 'warn'}" style="margin-top:6px">${done} of ${PLANS.length} confirmed</span></div>
+  <div class="catalog">
+    <div class="card flush planlist" role="listbox" aria-label="Plans">
+      ${PLANS.map(x => `<button class="${x.plan === p.plan ? 'active' : ''}" onclick="state.catalogSel='${x.plan}'; render()">
+          <span class="pn">${x.plan}</span>
+          <span>${state.confirmed.has(x.plan) ? '<span class="badge ok">✓</span>' : '<span class="badge warn">Proposed</span>'}</span>
+          <span class="ps">${bb(x)} · ${x.codes} prior code${x.codes > 1 ? 's' : ''}</span></button>`).join('')}
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap"><h2 style="margin:0">Plan <span class="mono" style="font-size:15px">${p.plan}</span></h2>
+        ${conf ? '<span class="badge ok">Confirmed</span>' : '<span class="badge warn">Needs confirmation</span>'}
+        ${(notes.bathsConflict || notes.denConflict) ? '<span class="badge warn">Conflict recorded</span>' : ''}<div class="spacer"></div>
+        <span class="faint mono" style="word-break:break-all">${esc(p.file)}</span></div>
+      <div class="plandetail">
+        <div><div class="drawing">${drawingSVG(p)}<span class="cap">scanned image · no text layer · page 1 of 1</span></div>
+          <p class="faint" style="font-size:12px;margin-top:6px">MVP shows the PDF as-is (browser viewer). Reading the drawing automatically is phase 2.</p></div>
+        <div>
+          <div class="field"><label>Plan name</label><input type="text" value="${p.plan}"><span class="proposal">From file name: token after "Toll Brothers_"</span></div>
+          <div class="field"><label>Bedrooms</label><div class="seg">${['Studio','1','2','3','4'].map((b, i) => `<button class="${p.beds === i ? 'on' : ''}">${b}</button>`).join('')}</div>
+            <span class="proposal ${notes.beds ? 'conflict' : ''}">${notes.beds || 'From prior data: matches all linked codes'}</span></div>
+          <div class="field"><label>Baths</label><div class="seg">${[1,1.5,2,2.5,3].map(b => `<button class="${p.baths === b ? 'on' : ''}">${b}</button>`).join('')}</div>
+            <span class="proposal ${notes.bathsConflict ? 'conflict' : ''}">${notes.baths || 'From prior data: matches all linked codes'}</span></div>
+          <div class="field"><label>Den</label><div class="seg"><button class="${p.den ? 'on' : ''}">Den</button><button class="${!p.den ? 'on' : ''}">No den</button></div>
+            <span class="proposal ${notes.denConflict ? 'conflict' : ''}">${notes.den || (fileDen ? 'File name ends in D → den proposed' : 'File name has no D suffix → no den proposed')}${notes.denConflict ? ' · file name says no den' : ''}</span></div>
+          <div class="field"><label>Drawing SF <span class="faint">(optional)</span></label><input type="text" placeholder="e.g. ${p.sfMin}"><span class="proposal">Unit directory: ${p.sfMin}–${p.sfMax} SF across linked units. Helpers order by the directory's smallest SF (D9).</span></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            ${conf ? `<button class="btn" onclick="state.confirmed.delete('${p.plan}'); render()">Unconfirm</button>`
+                   : `<button class="btn primary" onclick="confirmPlan('${p.plan}')">Confirm plan</button>`}
+            <button class="btn" onclick="toast('Mock: creates a provisional plan from a prior label')">Add provisional plan…</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+};
+window.confirmPlan = plan => {
+  state.confirmed.add(plan);
+  const next = PLANS.find(x => !state.confirmed.has(x.plan));
+  if (next) state.catalogSel = next.plan;
+  toast(`Plan ${plan} confirmed`); render();
+};
+
+screens.matching = () => {
+  const rows = PRIOR.filter(r => state.matchFilter === 'all' || r[9]);
+  const picked = state.a3dPick;
+  return `
+  <div class="pagehead"><div class="grow"><div class="stepno">Step 4</div><h1>Match prior codes to plans</h1>
+    <p class="muted">Each prior code maps to exactly one plan. Evidence is checked in order — label, beds/baths, den, SF, units — and every piece that agreed is recorded.</p></div></div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">67</div><div class="l">Prior codes</div></div>
+    <div class="kpi"><div class="v">${picked ? 67 : 64}</div><div class="l">Matched</div></div>
+    <div class="kpi"><div class="v">${picked ? 0 : 3}</div><div class="l">Need a pick</div></div>
+    <div class="kpi"><div class="v">26</div><div class="l">Plans</div></div>
+  </div>
+
+  ${picked ? `<div class="banner ok"><div><strong>A3D codes matched to ${picked}</strong>Saved as an override; the change log has a row. A re-run applies it without asking again.</div></div>` : `
+  <div class="card" style="border-color:var(--bad)">
+    <div style="display:flex;gap:10px;align-items:center"><span class="badge bad">E-01 · Blocking</span><h2 style="margin:0">a3d-1, a3d-2, a3d-3 — label "A3D" names no plan</h2></div>
+    <p class="muted" style="margin-top:8px">"1 Bed/2 Bath Den-A3D" · 6 units · 973–990 SF. Pick the plan these units are built as. Candidates ranked by how much evidence agrees:</p>
+    <div class="picker">
+      ${[
+        ['B2','1 bd + den / 2 ba (confirmed)', [0,1,1,1,null], '973–990 SF in range', true],
+        ['A2D','1 bd + den / 2 ba', [0,1,1,0,null], '1,049+ SF · 59 SF above', false],
+        ['A4D','1 bd + den / 1 ba', [0,0,1,0,null], '764–778 SF · 195 SF below', false],
+      ].map(([pl, desc, e, sf, best]) => `<div class="cand ${best ? 'best' : ''}"><span class="mono" style="font-weight:700;font-size:14px">${pl}</span>
+        <span>${desc} · ${sf}<br>${ev(e)} ${best ? '<span class="badge info">Best fit</span>' : ''}</span>
+        <button class="btn ${best ? 'primary' : ''} sm" onclick="pickA3D('${pl}')">Match to ${pl}</button></div>`).join('')}
+    </div>
+  </div>`}
+
+  <div class="card flush"><div class="cardhead"><h2>Prior code crosswalk</h2><div class="spacer"></div>
+    <div class="seg"><button class="${state.matchFilter === 'all' ? 'on' : ''}" onclick="state.matchFilter='all';render()">All</button><button class="${state.matchFilter !== 'all' ? 'on' : ''}" onclick="state.matchFilter='exc';render()">With exceptions</button></div></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Prior code</th><th>Description</th><th>Label</th><th class="num">Units</th><th>SF</th><th class="num">Rent</th><th>Plan</th><th>Helper</th><th>Evidence</th><th>Confidence</th><th></th></tr></thead>
+      <tbody>${rows.map(r => {
+        const isA3d = r[0].startsWith('a3d');
+        const plan = isA3d ? picked : r[6];
+        const helper = plan ? PLANS.find(p => p.plan === plan)?.helper : null;
+        const e = isA3d && picked ? [0,1,1,1,null] : r[7];
+        const cls = isA3d && !picked ? 'hlbad' : r[9] ? 'hl' : '';
+        return `<tr class="${cls}"><td class="mono">${r[0]}</td><td>${esc(r[1])}</td><td class="mono">${r[2]}</td><td class="num">${r[3]}</td><td>${r[4]}</td><td class="num">${r[5]}</td>
+          <td class="mono">${plan || '—'}</td><td class="mono"><strong>${helper || '—'}</strong></td><td>${ev(e)}</td>
+          <td>${isA3d && !picked ? '<span class="badge bad">None</span>' : isA3d ? '<span class="badge info">Override</span>' : r[8] === 'High' ? '<span class="badge ok">High</span>' : '<span class="badge warn">' + r[8] + '</span>'}</td>
+          <td>${r[9] ? `<span class="faint mono">${r[9]}</span>` : ''}</td></tr>`; }).join('')}
+      </tbody></table></div>
+    <div class="note">Showing ${rows.length} of 67 codes. Evidence: <span class="ev"><span class="y">✓</span></span> agreed · <span class="ev"><span class="n">✕</span></span> disagreed · <span class="ev"><span class="x">–</span></span> not available. Description parsing trims spaces around the dash (<code>Den -A3D</code>, <code>Den- A3D</code>).</div>
+  </div>`;
+};
+window.pickA3D = pl => {
+  state.a3dPick = pl; log('Prior codes a3d-1..3 · plan', 'none (label A3D)', pl, 'Units built as 1 bed + den, 2 bath; SF fits ' + pl);
+  toast(`a3d codes matched to ${pl} · helpers re-run`); render();
+};
+
+screens.review = () => {
+  const blk = openBlocking(), rev = openReview(), all = exceptions();
+  const canApprove = !blk.length && !rev.length && !state.approved;
+  const tabs = [['exceptions', `Exceptions (${blk.length + rev.length} open)`], ['plans', 'Plan summary'], ['units', 'Unit mapping'], ['checks', 'Validation'], ['log', `Change log (${state.changelog.length})`]];
+  return `
+  <div class="pagehead"><div class="grow"><div class="stepno">Steps 5–8 · Approval gate 1</div><h1>Review the mapping</h1>
+    <p class="muted">Helpers, regulatory codes and the unit-level mapping are recomputed from your inputs on every change. Approve when every blocking exception is resolved and every review item is acknowledged.</p></div>
+    <div style="text-align:right">
+      <button class="btn primary" ${canApprove ? '' : 'disabled'} onclick="approve()">${state.approved ? '✓ Approved' : 'Approve mapping'}</button>
+      <div class="faint" style="font-size:12px;margin-top:4px">${state.approved ? 'Approved by analyst · today' : blk.length ? `${blk.length} blocking left` : rev.length ? `${rev.length} review items to acknowledge` : 'Ready to approve'}</div>
+    </div></div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">356</div><div class="l">Units mapped</div></div>
+    <div class="kpi"><div class="v">${state.a3dPick ? 67 : 64}<span class="faint" style="font-size:14px"> → 26</span></div><div class="l">Prior codes → helpers</div></div>
+    <div class="kpi"><div class="v">${state.amiCode ? 30 : '26 + ?'}</div><div class="l">Final types (market + affordable)</div></div>
+    <div class="kpi"><div class="v">334 / 22</div><div class="l">Market / affordable</div></div>
+  </div>
+
+  <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" class="${state.reviewTab === k ? 'active' : ''}" onclick="state.reviewTab='${k}';render()">${l}</button>`).join('')}</div>
+  ${reviewTab[state.reviewTab](all)}`;
+};
+const reviewTab = {
+  exceptions: all => `<div class="card flush"><div class="tablewrap"><table>
+    <thead><tr><th>ID</th><th>Severity</th><th>Kind</th><th>Subject</th><th>Detail</th><th>Resolution</th></tr></thead>
+    <tbody>${all.map(e => `<tr class="${e.resolved ? '' : e.sev === 'blocking' ? 'hlbad' : 'hl'}">
+      <td class="mono" style="white-space:nowrap">${e.id}</td><td><span class="badge ${e.sev === 'blocking' ? 'bad' : 'warn'}">${e.sev}</span></td><td><strong>${e.kind}</strong></td>
+      <td class="mono" style="font-size:12px">${esc(e.subject)}</td><td class="muted" style="max-width:340px">${esc(e.detail)}</td>
+      <td style="min-width:190px">${e.resolved ? `<span class="badge ok">✓</span> <span class="faint">${esc(e.resolution)}</span>` : resolver(e)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="note">Blocking stops approval. Review items need an acknowledgement. Resolutions are saved to the property's Settings and written to the Exceptions tab of the mapping workbook.</div></div>`,
+  plans: () => `<div class="card flush"><div class="tablewrap"><table>
+    <thead><tr><th>Helper</th><th>Plan</th><th>Beds / baths</th><th class="num">SF min</th><th class="num">SF max</th><th class="num">Prior codes</th><th class="num">Market</th><th class="num">Affordable</th><th>Final codes</th></tr></thead>
+    <tbody>${PLANS.map(p => `<tr><td class="mono"><strong>${p.helper}</strong></td><td class="mono">${p.plan}</td><td>${bb(p)}</td><td class="num">${p.sfMin.toLocaleString()}</td><td class="num">${p.sfMax.toLocaleString()}${p.sfMax - p.sfMin > 40 ? ' <span class="badge warn">wide</span>' : ''}</td>
+      <td class="num">${p.codes}</td><td class="num">${p.mkt}</td><td class="num">${p.aff || ''}</td>
+      <td class="mono" style="font-size:12px">194m${p.helper}${p.aff ? `<br>194${state.amiCode || '?'}${p.helper}` : ''}</td></tr>`).join('')}
+    <tr><td colspan="5"><strong>Total</strong></td><td class="num"><strong>67</strong></td><td class="num"><strong>334</strong></td><td class="num"><strong>22</strong></td><td><strong>${state.amiCode ? 30 : '26 + 4 pending'}</strong></td></tr>
+    </tbody></table></div>
+    <div class="note">Within each letter, helpers number from 01 by the plan's smallest unit SF; den plans take their place in the same sequence with a "+", so A07 and A07+ never both exist.</div></div>`,
+  units: () => `<div class="toolbar"><input type="text" placeholder="Filter by unit, plan or helper…" style="max-width:280px"><select style="max-width:180px"><option>All statuses</option><option>Market</option><option>Affordable</option></select><span class="faint">Showing 12 of 356</span></div>
+    <div class="card flush"><div class="tablewrap"><table>
+    <thead><tr><th>Unit</th><th>Prior code</th><th>Plan</th><th>Helper</th><th>Status</th><th>AMI</th><th>Reg</th><th>Final code</th><th>Unit prop.</th><th class="num">Floor</th><th class="num">Line</th><th class="num">SF</th><th class="num">Bd</th><th class="num">Ba</th><th class="num">Rent</th></tr></thead>
+    <tbody>${UNITS.map(u => { const v = [...u]; if (v[6] === 'a') { v[6] = state.amiCode || '?'; v[7] = `194${state.amiCode || '?'}${v[3]}`; }
+      return `<tr>${v.map((c, i) => `<td class="${i >= 9 ? 'num' : ''} ${[0,1,2,3,6,7,8].includes(i) ? 'mono' : ''}">${i === 3 || i === 7 ? `<strong>${c}</strong>` : c}</td>`).join('')}</tr>`; }).join('')}
+    </tbody></table></div>
+    <div class="note">Floor and line come from the unit number: 3 digits → floor is the first digit; 4 digits → first two; line is the last two. Any other shape becomes a blocking exception.</div></div>`,
+  checks: () => `<div class="card flush"><div class="tablewrap"><table>
+    <thead><tr><th>Check</th><th>Rule</th><th>Result</th><th></th></tr></thead>
+    <tbody>${checks().map(([c, r, res, ok]) => `<tr><td><strong>${c}</strong></td><td class="muted">${r}</td><td class="mono">${res}</td><td>${ok === true ? '<span class="badge ok">Pass</span>' : ok === false ? '<span class="badge bad">Fail</span>' : '<span class="badge">After step 10</span>'}</td></tr>`).join('')}
+    </tbody></table></div><div class="note">Runs after gate 1 and again after step 10. Any failure blocks completion.</div></div>`,
+  log: () => `<div class="card flush"><div class="tablewrap"><table>
+    <thead><tr><th>When</th><th>Who</th><th>Field</th><th>Old</th><th>New</th><th>Reason</th></tr></thead>
+    <tbody>${state.changelog.slice().reverse().map(r => `<tr>${r.map((c, i) => `<td class="${i === 3 || i === 4 ? 'mono' : ''}">${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`,
+};
+function checks() {
+  const m = !!state.a3dPick, a = !!state.amiCode;
+  return [
+    ['Unit count','Mapped = directory = rent roll','356 = 356 = 356',true],
+    ['Every unit has a helper','No blank helper or final code', m && a ? '0 blanks' : `${(m ? 0 : 6) + (a ? 0 : 22)} blanks`, m && a],
+    ['Every prior code mapped','Each prior code → exactly one helper', m ? '67 of 67' : '64 of 67', m],
+    ['Market / affordable split','Matches the regulatory list','334 / 22',true],
+    ['Final type count','Distinct final codes = market + affordable', a ? '26 + 4 = 30' : '26 + ? (no AMI code)', a],
+    ['Sequence integrity','Each letter 01..n, no gaps or duplicates','S01–S04, A01–A12, B01–B10',true],
+    ['Den rule','No number both with and without "+"','Pass',true],
+    ['SF order','Helper numbers rise with smallest SF','Pass',true],
+    ['Consistency within a helper','Same beds, baths, den for every unit','Pass',true],
+    ['Code format','Property code + known reg code + helper', a ? 'Pass' : '22 codes use "?"', a],
+    ['Floor plan files','One file per helper; every name matches a helper', state.approved ? '26 / 26' : '—', state.approved ? true : null],
+    ['ETL workbook','Column H formula on every unit row; G matches by unit number', state.approved ? '356 / 356 (131 restored)' : '—', state.approved ? true : null],
+  ];
+}
+function resolver(e) {
+  if (e.action === 'ack') return `<button class="btn sm" onclick="ack('${e.id}')">Acknowledge</button>`;
+  if (e.action === 'match') return `<button class="btn sm" onclick="go('matching')">Pick plan →</button>`;
+  if (e.action === 'catalog') return `<button class="btn sm" onclick="state.catalogSel='${PLANS.find(p => !state.confirmed.has(p.plan))?.plan}'; go('catalog')">Open catalog →</button>`;
+  if (e.action === 'ami') return `<div style="display:flex;gap:6px"><input type="text" id="amiIn" placeholder="e.g. a" style="width:70px;padding:3px 6px" value="a"><button class="btn sm primary" onclick="setAmi()">Save</button></div>`;
+}
+window.ack = id => { state.acks.add(id); toast(`${id} acknowledged`); render(); };
+window.setAmi = () => { const v = $('#amiIn').value.trim(); if (!v) return; state.amiCode = v; log('AMI 50% · reg code', '(none on AMI tab)', v, 'Analyst-supplied code for 50% AMI (D5)'); toast(`50% AMI → "${v}" saved for 194`); render(); };
+window.approve = () => { state.approved = true; log('Gate 1', 'pending', 'approved', 'All blocking resolved, review items acknowledged'); toast('Gate 1 approved · steps 9–10 ran'); go('outputs'); };
+
+screens.outputs = () => {
+  if (!state.approved) return `
+    <div class="pagehead"><div class="grow"><div class="stepno">Steps 9–10 · Approval gate 2</div><h1>Outputs</h1></div></div>
+    <div class="card lockedcard"><h2>Locked until the mapping is approved</h2><p class="muted">Renaming floor plans and filling the ETL workbook only run after gate 1.</p>
+    <button class="btn primary" onclick="go('review')">Go to review</button></div>`;
+  const amiC = state.amiCode;
+  return `
+  <div class="pagehead"><div class="grow"><div class="stepno">Steps 9–10 · Approval gate 2</div><h1>Outputs</h1>
+    <p class="muted">Everything is written to a fresh output folder for property 194; the uploads are kept unchanged. A re-run replaces the folder whole.</p></div></div>
+
+  ${state.complete ? `<div class="banner ok"><div><strong>Property 194 · Julius marked complete</strong>The ETLs can run from the filled workbook. Settings and overrides are saved, so a re-run reproduces these outputs.</div></div>` : ''}
+
+  <div class="card flush"><div class="cardhead"><h2>Downloads</h2></div>
+    ${[
+      ['194 - Julius - Unit Type Mapping.xlsx','Plan Summary · Prior Code Crosswalk · Unit Mapping · Settings · Floor Plan Files · Exceptions · Change Log','Deliverables 1–3'],
+      ['194 - Julius - Units & Unit Types.xlsx','Template with column G filled for 356 rows (matched by unit number), header C2–C8, 131 column H formulas restored','ETL workbook'],
+      ['194 - Julius - Floor Plans (Rose Names).zip','26 PDFs, one per helper, in "Julius Floor Plans - Rose Names/"','Renamed plans'],
+      ['194 - Julius - Exceptions.csv','7 exceptions with resolutions (also in the mapping workbook)','Exceptions list'],
+    ].map(([f, d, k]) => `<div class="upload"><div><span class="badge info">${k}</span><div class="file" style="margin-top:4px;color:var(--text);font-weight:600">${esc(f)}</div></div>
+        <div><button class="btn sm" onclick="toast('Mock: download')">Download</button></div><div class="parsed">${esc(d)}</div></div>`).join('')}
+  </div>
+
+  <div class="grid2">
+    <div class="card"><h2>Floor plan files</h2><p class="faint" style="font-size:12px">Copied, never renamed in place. One per helper — market and affordable share a drawing.</p>
+      <ul class="files">${PLANS.map(p => `<li><span>${esc(p.file)}</span><span class="faint">→</span><span>194 - Julius - ${p.helper}.pdf</span></li>`).join('')}</ul></div>
+    <div class="card"><h2>ETL workbook check</h2>
+      <div class="banner warn" style="margin-bottom:12px"><div><strong>131 rows were missing the Final Unit Type formula</strong>Restored from the template's pattern in column H (D8). Without it the type count read 29 instead of 30.</div></div>
+      <table><tbody>
+        <tr><td>Column G filled, matched by unit number</td><td class="num mono">356 / 356</td></tr>
+        <tr><td>Column H formula present</td><td class="num mono">356 / 356</td></tr>
+        <tr><td>Computed column H values (what Excel should show)</td><td class="num mono">30 distinct</td></tr>
+        <tr><td>Formula columns left untouched (H, M, O)</td><td class="num mono">Yes</td></tr>
+        <tr><td>4-digit unit numbers (Floor formula bug, D13)</td><td class="num mono">None</td></tr>
+        <tr><td>Reg code for 50% AMI</td><td class="num mono">${esc(amiC)}</td></tr>
+      </tbody></table>
+      <p class="faint" style="font-size:12px;margin-top:10px">The tool checks formulas are present and what they should compute; it does not evaluate Excel. Open the workbook to confirm.</p>
+    </div>
+  </div>
+
+  <div class="card"><h2>Gate 2 · Complete the property</h2>
+    <label class="check"><input type="checkbox" ${state.etlChecked ? 'checked' : ''} ${state.complete ? 'disabled' : ''} onchange="state.etlChecked=this.checked; render()">
+      <span><strong>I opened the filled ETL workbook in Excel and saw no formula errors.</strong><br><span class="muted">Final tab shows 30 unit types; Helper column is filled on every unit row.</span></span></label>
+    <button class="btn primary" ${state.etlChecked && !state.complete ? '' : 'disabled'} onclick="state.complete=true; log('Gate 2','pending','complete','ETL workbook checked in Excel'); toast('Property 194 marked complete'); render()">${state.complete ? '✓ Complete' : 'Mark property complete'}</button>
+  </div>`;
+};
+
+/* ---------------- router ---------------- */
+function go(r) { location.hash = r; }
+window.go = go;
+function render() {
+  const r = (location.hash || '#review').slice(1);
+  state.route = screens[r] ? r : 'review';
+  $('#main').innerHTML = screens[state.route]();
+  renderSteps();
+}
+window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
+window.render = render; window.state = state; window.toast = toast;
+
+$('#themeBtn').addEventListener('click', () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+});
+render();
+</script>
+</body>
+</html>
