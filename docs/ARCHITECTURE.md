@@ -1,16 +1,16 @@
 # Architecture proposal (for discussion)
 
-Status: draft, nothing built yet. Pairs with [PRD.md](PRD.md) and the clickable mock in [`mocks/index.html`](../mocks/index.html).
+Status: draft. The starter app exists (`apps/web`, `apps/api`, with the customer walkthrough and the mock in [`apps/web/public/mock/index.html`](../apps/web/public/mock/index.html)); `packages/core` and `packages/io` below are not built yet. Pairs with [PRD.md](PRD.md).
 
 ## Stack
 
-A small TypeScript monorepo (pnpm workspaces). Beginner-friendly: one language, one package manager, and each piece is a well-documented library.
+A small TypeScript monorepo (npm workspaces). Beginner-friendly: one language, one package manager, and each piece is a well-documented library.
 
 ```
 prop-mgmt/
 ├─ apps/
-│  ├─ web/          React + Vite + TanStack Router / Query / Table
-│  └─ api/          Hono on Node (@hono/node-server)
+│  ├─ web/          React + Vite + TanStack Router / Query / Table   [exists]
+│  └─ api/          Hono on Node (@hono/node-server)                 [exists]
 ├─ packages/
 │  ├─ core/         the rules: pure functions, no I/O, tested against Julius
 │  └─ io/           Yardi adapters (xlsx → flat tables) and writers (xlsx, zip)
@@ -105,7 +105,7 @@ The left step rail reads the same `GET /pipeline` response, so its badges ("24 o
 
 ## Suggested build order
 
-1. Repo skeleton: web + api + core, `pnpm dev` runs both, one route calling one Hono endpoint (the "hello world" that proves the wiring).
+1. ~~Repo skeleton: web + api, `npm run dev` runs both, one route calling one Hono endpoint.~~ Done, with the customer walkthrough.
 2. `core` + `io` with unit tests on hand-made sample data; Julius golden test as soon as the files arrive.
 3. Property + uploads + reconcile (screens 1–2).
 4. Catalog, matching, overrides (screens 3–4).

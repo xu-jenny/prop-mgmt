@@ -1,0 +1,14 @@
+{
+  "name": "prop-mgmt",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,magenta \"npm run dev -w @prop-mgmt/api\" \"npm run dev -w @prop-mgmt/web\"",
+    "build": "npm run build -w @prop-mgmt/web",
+    "start": "npm run start -w @prop-mgmt/api",
+    "typecheck": "npm run typecheck --workspaces"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.7"
+  }
+}

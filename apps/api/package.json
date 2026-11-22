@@ -1,0 +1,22 @@
+{
+  "name": "@prop-mgmt/api",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": { "types": "./src/app.ts", "default": "./src/app.ts" }
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "NODE_ENV=production tsx src/server.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.11",
+    "hono": "^4.13.19",
+    "tsx": "^4.23.15"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "~5.9.0"
+  }
+}
